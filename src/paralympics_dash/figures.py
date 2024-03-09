@@ -1,9 +1,10 @@
 from pathlib import Path
-
 import pandas as pd
 import plotly.express as px
+import sqlite3
 
 event_data = Path(__file__).parent.parent.parent.joinpath("data", "paralympic_events.csv")
+paralympic_db = Path(__file__).parent.joinpath("paralympics_dash.sqlite")
 
 
 def line_chart(feature):
@@ -87,3 +88,29 @@ def bar_gender(event_type):
                  )
     fig.update_xaxes(ticklen=0)
     return fig
+
+def scatter_geo():
+    # create database connection
+    connection = sqlite3.connect(paralympic_db)
+
+    # define the sql query
+    sql = '''
+        SELECT event.id, event.host, event.year, location.lat, location.lon
+        FROM event
+        JOIN location ON event.host = location.city 
+        '''
+
+    df_locs = pd.read_sql(sql=sql, con=connection, index_col=None)
+    # The lat and lon are stored as string but need to be floats for the scatter_geo
+    df_locs['lon'] = df_locs['lon'].astype(float)
+    df_locs['lat'] = df_locs['lat'].astype(float)
+    # Adds a new column that concatenates the city and year e.g. Barcelona 2012
+    df_locs['name'] = df_locs['host'] + ' ' + df_locs['year'].astype(str)
+
+    fig = px.scatter_geo(df_locs,
+                         lat=df_locs.lat,
+                         lon=df_locs.lon,
+                         hover_name=df_locs.name,
+                         title="Where have the paralympics been held?",
+                         )
+    return fig 
