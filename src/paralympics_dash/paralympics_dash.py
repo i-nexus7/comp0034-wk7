@@ -1,13 +1,14 @@
 # Version after the final activity in week 6
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from figures import line_chart
+from figures import line_chart, bar_gender
 
 # Variable that contains the external_stylesheet to use, in this case Bootstrap styling from dash bootstrap
 # components (dbc)
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
 line = line_chart("sports")
+bar = bar_gender("summer")
 
 # Define a variable that contains the meta tags
 meta_tags = [
@@ -91,7 +92,7 @@ row_three = dbc.Row([
         dcc.Graph(id="line", figure=line),
     ], width=4),
     dbc.Col(children=[
-        html.Img(src=app.get_asset_url('bar-chart-placeholder.png'), className="img-fluid"),
+        dcc.Graph(id="bar", figure=bar),
     ], width=4),
 ], align="start")
 
